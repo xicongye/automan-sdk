@@ -63,42 +63,37 @@ include scripts/config.mk
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 export VERSION PATCHLEVEL SUBLEVEL KERNELVERSION
 
-ifeq ($(CONFIG_ARCH_AARCH64), y)
-	ARCH			= aarch64
-	CROSS_COMPILE 	= aarch64-linux-gnu-
-	BFD_NAME		= elf64-littleaarch64
-else ifeq ($(CONFIG_ARCH_RISCV64), y)
+ifeq ($(CONFIG_ARCH_RISCV64), y)
 	ARCH			= riscv64
-	CROSS_COMPILE 	= riscv64-unknown-elf-
+	CROSS_COMPILE 		= riscv64-unknown-elf-
 	BFD_NAME		= elf64-littleriscv
 else ifeq ($(CONFIG_ARCH_RISCV32), y)
 	ARCH			= riscv32
-	CROSS_COMPILE 	= riscv32-unknown-elf-
+	CROSS_COMPILE 		= riscv32-unknown-elf-
 endif
 
 SRCARCH 	:= $(ARCH)
 
-
 # Make variables (CC, etc...)
-AS			= $(CROSS_COMPILE)as
-LD			= $(CROSS_COMPILE)ld
-CC			= $(CROSS_COMPILE)gcc
-CPP			= $(CC) -E
-AR			= $(CROSS_COMPILE)ar
-NM			= $(CROSS_COMPILE)nm
+AS		= $(CROSS_COMPILE)as
+LD		= $(CROSS_COMPILE)ld
+CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CC) -E
+AR		= $(CROSS_COMPILE)ar
+NM		= $(CROSS_COMPILE)nm
 STRIP		= $(CROSS_COMPILE)strip
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
-LEX			= flex
+LEX		= flex
 YACC		= bison
-AWK			= awk
+AWK		= awk
 PERL		= perl
 PYTHON		= python
 PYTHON2		= python2
 PYTHON3		= python3
 CHECK		= sparse
-DTC			= dtc
-CAT			= cat
+DTC		= dtc
+CAT		= cat
 
 EEOSINCLUDE    := \
 		-I$(srctree)/arch/$(SRCARCH)/include \
@@ -190,7 +185,7 @@ libs-y2		:= $(patsubst %/, %/built-in.o, $(filter-out %.o, $(libs-y)))
 # Externally visible symbols (used by link-eeos.sh)
 export MBUILD_EEOS_MAIN	:= $(core-y) $(libs-y2) $(drivers-y) $(external-y)
 export MBUILD_EEOS_LIBS	:= $(libs-y1)
-export MBUILD_LDS		:= $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
+export MBUILD_LDS	:= $(objtree)/arch/$(SRCARCH)/ld_script/kernel.lds
 
 eeos-deps := $(MBUILD_LDS) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS)
 
@@ -220,8 +215,8 @@ eeos: $(eeos-deps) scripts/generate_allsymbols.py
 	$(Q) $(LD) $(eeos_LDFLAGS) -o $(MBUILD_IMAGE_ELF) $(MBUILD_EEOS_MAIN) $(MBUILD_EEOS_LIBS) $(MBUILD_IMAGE_SYMBOLS) .tmp.dtb.o
 	$(Q) echo "  OBJCOPY $(MBUILD_IMAGE)"
 	$(Q) $(OBJCOPY) -O binary  $(MBUILD_IMAGE_ELF) $(MBUILD_IMAGE)
-	$(Q) echo "  OBJDUMP eeos.dis"
-	$(Q) $(OBJDUMP) $(MBUILD_IMAGE_ELF) -D > eeos.dis
+	$(Q) echo "  OBJDUMP eeos.asm"
+	$(Q) $(OBJDUMP) $(MBUILD_IMAGE_ELF) -D > eeos.asm
 
 # The actual objects are generated when descending,
 # make sure no implicit rule kicks in
@@ -274,8 +269,8 @@ include/config/config.h: .config
 
 clean: $(clean-dirs)
 	$(Q) echo "  CLEAN   all .o .*.d *.dtb built-in.o"
-	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o"
-	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.dis .tmp.dtb.o
+	$(Q) echo "  CLEAN   allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.asm .tmp.dtb.o"
+	$(Q) rm -f allsymbols.o allsymbols.S linkmap.txt eeos.s .tmp.eeos.elf .tmp.eeos.symbols eeos.bin eeos.elf eeos.asm .tmp.dtb.o
 
 distclean: clean
 	$(Q) echo "  CLEAN   .config include/config"
@@ -323,10 +318,6 @@ else
 endif
 
 qemu: eeos
-ifeq ("$(SRCARCH)", "aarch64")
-	qemu-system-aarch64 -machine virt,gic-version=3 -cpu cortex-a57 -smp 1 -m 2048 -nographic \
-		-serial mon:stdio -kernel $(MBUILD_IMAGE) $(QEMU_FLAG)
-endif
 ifeq ("$(SRCARCH)", "riscv64")
 	qemu-system-riscv64 -machine virt -smp 1 -m 1024 -nographic -serial mon:stdio -bios $(MBUILD_IMAGE) $(QEMU_FLAG)
 endif

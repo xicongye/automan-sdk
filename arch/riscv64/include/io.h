@@ -1,5 +1,5 @@
-#ifndef __ASM_ARM_IO_H
-#define __ASM_ARM_IO_H
+#ifndef __ASM_RISCV_IO_H
+#define __ASM_RISCV_IO_H
 
 #include <stdint.h>
 #include <barriers.h>
@@ -100,4 +100,4 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 #define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
 #define writeq(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
 
-#endif	/* __ASM_ARM_IO_H */
+#endif	/* __ASM_RISCV_IO_H */

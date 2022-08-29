@@ -2,6 +2,7 @@ menu "Device Tree"
 
 config FLAT_TEST
     bool "Enable of flat test"
+    default y
 
 config DEFAULT_DEVICE_TREE 
     depends on FLAT_TEST

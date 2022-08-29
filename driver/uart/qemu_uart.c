@@ -9,11 +9,6 @@
 
 static u64 early_mm_base;
 
-#ifdef  CONFIG_ARCH_AARCH64
-#define QEMU_UART_DR ((void __iomem *)(0xFFFF100000000000 + UART01x_DR))
-#define QEMU_UART_FR ((void __iomem *)(0xFFFF100000000000 + UART01x_FR))
-#endif
-
 #ifdef  CONFIG_ARCH_RISCV64
 #define QEMU_UART_DR ((void __iomem *)(early_mm_base + 0x00))
 #define QEMU_UART_FR ((void __iomem *)(early_mm_base + 0x05))
